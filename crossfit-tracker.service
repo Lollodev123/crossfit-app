@@ -1,0 +1,14 @@
+[Unit]
+Description=CrossFit Tracker API
+After=network.target
+
+[Service]
+Type=simple
+User=www-data
+WorkingDirectory=/var/www/crossfit
+ExecStart=/usr/bin/python3 /var/www/crossfit/server.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

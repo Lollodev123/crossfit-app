@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CF Open 2027 — Tracker</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Inter',system-ui,sans-serif;background:#f2f2ef;color:#111110;min-height:100vh;}
+.page{max-width:700px;margin:0 auto;padding:0 0 88px;}
+.app-hdr{background:#fff;border-bottom:1px solid #e4e4e0;padding:12px 16px;position:sticky;top:0;z-index:50;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.app-hdr-title{font-size:10px;font-weight:700;letter-spacing:0.1em;color:#aaa;flex-shrink:0;}
+.hdr-right{display:flex;align-items:center;gap:10px;}
+#syncStatus{font-size:10px;font-weight:500;white-space:nowrap;}
+.dots-row{display:flex;gap:5px;align-items:center;}
+.dot{width:6px;height:6px;border-radius:50%;background:#e0e0db;transition:all 0.2s;}
+.dot.active{transform:scale(1.6);}
+.tab-bar{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:700px;background:#fff;border-top:1px solid #e4e4e0;display:flex;z-index:100;}
+.tb{flex:1;border:none;background:none;cursor:pointer;padding:10px 4px 16px;font-size:10px;font-weight:600;color:#bbb;font-family:'Inter',sans-serif;letter-spacing:0.05em;transition:color 0.15s;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.tb .ic{font-size:18px;line-height:1;}
+.tb.active{color:#111110;}
+.pane{display:none;padding:14px 14px 4px;}
+.pane.active{display:block;}
+.mnav{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.mnavbtn{background:none;border:1px solid #ddd;border-radius:8px;width:36px;height:36px;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#111;transition:background 0.15s;}
+.mnavbtn:hover:not(:disabled){background:#f2f2ef;}
+.mnavbtn:disabled{opacity:0.2;cursor:default;}
+.month-title strong{font-size:17px;font-weight:700;display:block;text-align:center;}
+.month-title small{font-size:11px;color:#999;display:block;text-align:center;margin-top:2px;}
+.plan-toolbar{display:flex;justify-content:flex-end;gap:8px;margin-bottom:10px;}
+.tool-btn{background:none;border:1px solid #ddd;border-radius:8px;padding:5px 12px;font-size:12px;font-weight:500;color:#666;cursor:pointer;font-family:'Inter',sans-serif;transition:all 0.15s;}
+.tool-btn:hover{background:#f2f2ef;}
+.tool-btn.primary{background:#111;color:#fff;border-color:#111;}
+.tool-btn.primary:hover{opacity:0.85;}
+.tool-btn.danger{border-color:#F09595;color:#A32D2D;}
+.tool-btn.danger:hover{background:#FCEBEB;}
+.card{background:#fff;border-radius:12px;border:1px solid #e4e4e0;padding:14px 16px;margin-bottom:11px;}
+.card.ph1{border-top:3px solid #1D9E75;}
+.card.ph2{border-top:3px solid #378ADD;}
+.card.ph3{border-top:3px solid #BA7517;}
+.card-hd{font-size:10px;font-weight:700;letter-spacing:0.08em;color:#bbb;margin-bottom:10px;}
+.row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #f0f0ec;font-size:13px;gap:8px;}
+.row:last-child{border-bottom:none;padding-bottom:0;}
+.row-lbl{color:#555;flex:1;line-height:1.3;}
+.row-right{display:flex;align-items:center;gap:7px;flex-shrink:0;}
+.row-tgt{font-weight:600;color:#111;}
+.badge{font-size:11px;font-weight:600;padding:2px 8px;border-radius:20px;}
+.bg-g{background:#E1F5EE;color:#085041;}
+.bg-y{background:#FAEEDA;color:#633806;}
+.bg-r{background:#FCEBEB;color:#A32D2D;}
+.bg-n{background:#f2f2ef;color:#aaa;}
+.focus-box{background:#fff;border-radius:10px;border:1px solid #e4e4e0;padding:14px 16px;margin-bottom:11px;}
+.focus-lbl{font-size:10px;font-weight:700;letter-spacing:0.08em;color:#bbb;margin-bottom:6px;}
+.focus-txt{font-size:13px;color:#444;line-height:1.65;}
+.ms-tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;margin-top:9px;}
+.ms1{background:#E1F5EE;color:#085041;}
+.ms2{background:#E6F1FB;color:#0C447C;}
+.ms3{background:#FAEEDA;color:#633806;}
+.edit-row{flex-wrap:wrap;align-items:flex-start;gap:6px;}
+.edit-row .row-lbl{font-size:12px;color:#888;min-width:100%;margin-bottom:2px;}
+.edit-inputs{display:flex;gap:6px;width:100%;align-items:center;}
+.dsp-inp{flex:1;font-size:12px;}
+.tgt-inp{width:68px;font-size:12px;text-align:right;}
+.edit-note{font-size:11px;color:#aaa;margin-bottom:14px;line-height:1.5;}
+.edit-actions{display:flex;gap:8px;margin-top:4px;}
+.form-hd{font-size:10px;font-weight:700;letter-spacing:0.08em;color:#bbb;margin:16px 0 8px;}
+.form-hd:first-child{margin-top:0;}
+.inp-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid #f0f0ec;gap:12px;}
+.inp-row:last-child{border-bottom:none;}
+.inp-lbl{font-size:13px;color:#333;flex:1;line-height:1.3;}
+.inp-sub{font-size:11px;color:#aaa;display:block;}
+input[type=number],input[type=text],input[type=date],textarea,select{font-family:'Inter',sans-serif;font-size:13px;border:1px solid #e0e0db;border-radius:8px;padding:7px 10px;color:#111;background:#fff;outline:none;transition:border 0.15s;}
+input[type=number]{width:78px;text-align:right;}
+input.ti{width:78px;text-align:right;}
+input[type=date]{width:145px;}
+textarea{width:100%;min-height:80px;resize:vertical;}
+select{width:100%;}
+input:focus,textarea:focus,select:focus{border-color:#1D9E75;}
+.save-btn{width:100%;padding:14px;background:#111;color:#fff;border:none;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;margin-top:14px;transition:opacity 0.15s;}
+.save-btn:hover{opacity:0.82;}
+.log-entry{background:#fff;border-radius:10px;border:1px solid #e4e4e0;padding:12px 14px;margin-bottom:8px;}
+.log-date{font-size:11px;font-weight:600;color:#aaa;margin-bottom:6px;}
+.log-pills{display:flex;flex-wrap:wrap;gap:5px;}
+.log-pill{font-size:11px;font-weight:500;background:#f2f2ef;color:#555;padding:2px 8px;border-radius:20px;}
+.log-note{font-size:13px;color:#555;margin-top:7px;font-style:italic;line-height:1.5;}
+.chart-box{position:relative;width:100%;height:260px;background:#fff;border-radius:12px;border:1px solid #e4e4e0;padding:16px;margin-bottom:12px;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.stat-card{background:#fff;border-radius:10px;border:1px solid #e4e4e0;padding:14px;}
+.stat-lbl{font-size:10px;font-weight:700;letter-spacing:0.06em;color:#bbb;margin-bottom:5px;}
+.stat-val{font-size:24px;font-weight:700;}
+.stat-unit{font-size:12px;color:#aaa;font-weight:400;}
+.chart-legend{display:flex;gap:16px;font-size:12px;color:#888;margin-bottom:10px;}
+.legend-dot{width:10px;height:10px;border-radius:2px;display:inline-block;margin-right:5px;vertical-align:middle;}
+.note-card{background:#fff;border-radius:10px;border:1px solid #e4e4e0;padding:14px;margin-bottom:10px;position:relative;}
+.note-card-date{font-size:11px;font-weight:600;color:#aaa;margin-bottom:6px;}
+.note-card-text{font-size:14px;color:#333;line-height:1.65;}
+.del-btn{position:absolute;top:12px;right:12px;background:none;border:none;cursor:pointer;color:#ccc;font-size:18px;line-height:1;padding:0;}
+.del-btn:hover{color:#E24B4A;}
+.empty{text-align:center;padding:48px 20px;color:#bbb;font-size:14px;line-height:1.8;}
+.toast{position:fixed;bottom:96px;left:50%;transform:translateX(-50%);background:#111;color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:500;opacity:0;transition:opacity 0.3s;z-index:200;white-space:nowrap;}
+.toast.show{opacity:1;}
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="app-hdr">
+  <span class="app-hdr-title">CROSSFIT OPEN 2027</span>
+  <div class="hdr-right">
+    <span id="syncStatus" style="color:#ccc;">○ connecting</span>
+    <div class="dots-row" id="dotsRow"></div>
+  </div>
+</div>
+
+<!-- PLAN -->
+<div class="pane active" id="pane-plan">
+  <div class="mnav">
+    <button class="mnavbtn" id="prevM" onclick="changeM(-1)">←</button>
+    <div class="month-title"><strong id="mName"></strong><small id="mPhase"></small></div>
+    <button class="mnavbtn" id="nextM" onclick="changeM(1)">→</button>
+  </div>
+  <div class="plan-toolbar" id="planToolbar"></div>
+  <div id="planContent"></div>
+</div>
+
+<!-- LOG -->
+<div class="pane" id="pane-log">
+  <div class="form-hd">Date</div>
+  <input type="date" id="logDate">
+  <div class="form-hd">Barbell — 1RM (kg)</div>
+  <div class="card" style="padding:6px 16px;">
+    <div class="inp-row"><span class="inp-lbl">Clean & Jerk</span><input type="number" id="l_cj" placeholder="—" step="0.5"></div>
+    <div class="inp-row"><span class="inp-lbl">Snatch</span><input type="number" id="l_sn" placeholder="—" step="0.5"></div>
+    <div class="inp-row"><span class="inp-lbl">Back squat</span><input type="number" id="l_bs" placeholder="—" step="0.5"></div>
+    <div class="inp-row"><span class="inp-lbl">Front squat</span><input type="number" id="l_fs" placeholder="—" step="0.5"></div>
+  </div>
+  <div class="form-hd">Gymnastics — max fresh</div>
+  <div class="card" style="padding:6px 16px;">
+    <div class="inp-row"><span class="inp-lbl">Ring MU<span class="inp-sub">unbroken</span></span><input type="number" id="l_rmu" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Bar MU<span class="inp-sub">unbroken</span></span><input type="number" id="l_bmu" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Butterfly C2B<span class="inp-sub">unbroken</span></span><input type="number" id="l_c2b" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Strict HSPU</span><input type="number" id="l_hspu" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Deficit HSPU 10cm</span><input type="number" id="l_hspu_d" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">HS walk<span class="inp-sub">meters</span></span><input type="number" id="l_hsw" placeholder="—"></div>
+  </div>
+  <div class="form-hd">Engine</div>
+  <div class="card" style="padding:6px 16px;">
+    <div class="inp-row"><span class="inp-lbl">Double-unders<span class="inp-sub">max unbroken</span></span><input type="number" id="l_du" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Row 500m<span class="inp-sub">mm:ss</span></span><input type="text" class="ti" id="l_row500" placeholder="1:45"></div>
+    <div class="inp-row"><span class="inp-lbl">Run 5km<span class="inp-sub">mm:ss</span></span><input type="text" class="ti" id="l_run5k" placeholder="22:00"></div>
+    <div class="inp-row"><span class="inp-lbl">Bodyweight<span class="inp-sub">kg</span></span><input type="number" id="l_bw" placeholder="—" step="0.1"></div>
+  </div>
+  <div class="form-hd">Benchmark WODs — fresh, rested (mm:ss)</div>
+  <div class="card" style="padding:6px 16px;">
+    <div class="inp-row"><span class="inp-lbl">Fran<span class="inp-sub">21-15-9 thrusters 43kg + pull-ups</span></span><input type="text" class="ti" id="l_fran" placeholder="—:——"></div>
+    <div class="inp-row"><span class="inp-lbl">Grace<span class="inp-sub">30 C&J 61kg</span></span><input type="text" class="ti" id="l_grace" placeholder="—:——"></div>
+    <div class="inp-row"><span class="inp-lbl">Helen<span class="inp-sub">3 rds: 400m, 21 KB 32kg, 12 pull-ups</span></span><input type="text" class="ti" id="l_helen" placeholder="—:——"></div>
+    <div class="inp-row"><span class="inp-lbl">Isabel<span class="inp-sub">30 snatches 61kg</span></span><input type="text" class="ti" id="l_isabel" placeholder="—:——"></div>
+    <div class="inp-row"><span class="inp-lbl">Diane<span class="inp-sub">21-15-9 deadlift 100kg + HSPU</span></span><input type="text" class="ti" id="l_diane" placeholder="—:——"></div>
+  </div>
+  <div class="form-hd">Session note</div>
+  <textarea id="l_note" placeholder="Context, feelings, wins, blocks..."></textarea>
+  <button class="save-btn" onclick="saveLog()">Save entry</button>
+  <div class="form-hd" style="margin-top:24px;">Recent entries</div>
+  <div id="recentLogs"></div>
+</div>
+
+<!-- PROGRESS -->
+<div class="pane" id="pane-progress">
+  <div style="margin-bottom:12px;">
+    <select id="metricSel" onchange="renderProgress()">
+      <optgroup label="Barbell">
+        <option value="cj">Clean & Jerk (kg)</option>
+        <option value="sn">Snatch (kg)</option>
+        <option value="bs">Back squat (kg)</option>
+        <option value="fs">Front squat (kg)</option>
+      </optgroup>
+      <optgroup label="Gymnastics">
+        <option value="rmu">Ring MU — max fresh</option>
+        <option value="bmu">Bar MU — max fresh</option>
+        <option value="c2b">Butterfly C2B</option>
+        <option value="hspu">Strict HSPU</option>
+        <option value="hspu_d">Deficit HSPU 10cm</option>
+        <option value="hsw">HS walk (m)</option>
+      </optgroup>
+      <optgroup label="Engine">
+        <option value="du">Double-unders</option>
+        <option value="row500">Row 500m (time)</option>
+        <option value="run5k">Run 5km (time)</option>
+      </optgroup>
+      <optgroup label="WODs">
+        <option value="fran">Fran</option>
+        <option value="grace">Grace</option>
+        <option value="helen">Helen</option>
+        <option value="isabel">Isabel</option>
+        <option value="diane">Diane</option>
+      </optgroup>
+    </select>
+  </div>
+  <div class="stat-grid" id="statGrid"></div>
+  <div class="chart-legend">
+    <span><span class="legend-dot" style="background:#1D9E75;"></span>Target</span>
+    <span><span class="legend-dot" style="background:#111110;"></span>Actual</span>
+  </div>
+  <div class="chart-box"><canvas id="progChart" role="img" aria-label="Progress chart"></canvas></div>
+  <div id="logHistory"></div>
+</div>
+
+<!-- NOTES -->
+<div class="pane" id="pane-notes">
+  <div class="form-hd">New note</div>
+  <textarea id="quickNote" placeholder="Training thoughts, wins, setbacks, what clicked today..."></textarea>
+  <button class="save-btn" onclick="saveNote()" style="margin-top:8px;">Save note</button>
+  <div class="form-hd" style="margin-top:24px;">All notes</div>
+  <div id="notesList"></div>
+</div>
+
+</div>
+
+<nav class="tab-bar">
+  <button class="tb active" onclick="showTab('plan')" id="tab-plan"><span class="ic">▦</span>PLAN</button>
+  <button class="tb" onclick="showTab('log')" id="tab-log"><span class="ic">⊕</span>LOG</button>
+  <button class="tb" onclick="showTab('progress')" id="tab-progress"><span class="ic">↗</span>CHART</button>
+  <button class="tb" onclick="showTab('notes')" id="tab-notes"><span class="ic">≡</span>NOTES</button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────────────────
+var API_KEY = 'CF_SECRET_KEY_PLACEHOLDER'; // replaced by setup.sh
+var API_URL = '/api/data';
+
+// ── PLAN DATA ──────────────────────────────────────────────────────────────
+var PLAN=[
+{m:1,ph:1,name:'Month 1 — Jul 2026',phLabel:'Phase 1 · Skill locking',
+ focus:'Van travel mid-month: bring rings + jump rope, train every day. Biggest gap right now is butterfly C2B — drill rhythm before reps. Let the oly coach own the barbell.',
+ tag:null,
+ tgt:{cj:84,sn:72,bs:127,fs:103,rmu:6,bmu:7,c2b:10,hspu:17,hspu_d:null,hsw:30,du:100,row500:104,run5k:1380,fran:540,grace:null,helen:690,isabel:null,diane:null},
+ groups:[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'84 kg'},{l:'Snatch',k:'sn',d:'72 kg'},{l:'Front squat',k:'fs',d:'103 kg'},{l:'Back squat',k:'bs',d:'127 kg'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu',d:'6 unbroken'},{l:'Bar MU (fresh)',k:'bmu',d:'7 unbroken'},{l:'Butterfly C2B',k:'c2b',d:'10 unbroken'},{l:'Strict HSPU',k:'hspu',d:'17 unbroken'},{l:'HS walks',k:'hsw',d:'30 m'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du',d:'100 unbroken'},{l:'Row 500m',k:'row500',d:'1:44'},{l:'Run 5km',k:'run5k',d:'23:00'}]},
+  {title:'BENCHMARK WODS — fresh',rows:[{l:'Fran',k:'fran',d:'Sub 9:00 — first test'},{l:'Helen',k:'helen',d:'Sub 11:30 — first test'}]}
+]},
+{m:2,ph:1,name:'Month 2 — Aug 2026',phLabel:'Phase 1 · Skill locking',
+ focus:'C2B rhythm clicks into WODs. Ring + bar MUs cycling in metcons. DUs consistent at 130. Test Grace and Diane for the first time.',
+ tag:null,
+ tgt:{cj:87,sn:74,bs:128,fs:105,rmu:8,bmu:9,c2b:15,hspu:19,hspu_d:3,hsw:35,du:130,row500:102,run5k:1350,fran:450,grace:480,helen:660,isabel:null,diane:480},
+ groups:[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'87 kg'},{l:'Snatch',k:'sn',d:'74 kg'},{l:'Front squat',k:'fs',d:'105 kg'},{l:'Back squat',k:'bs',d:'128 kg'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu',d:'8 unbroken, in WODs'},{l:'Bar MU (fresh)',k:'bmu',d:'9 unbroken, in WODs'},{l:'Butterfly C2B',k:'c2b',d:'15 unbroken'},{l:'Strict HSPU',k:'hspu',d:'19 unbroken'},{l:'Deficit HSPU (10cm)',k:'hspu_d',d:'First 3 reps'},{l:'HS walks',k:'hsw',d:'35 m'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du',d:'130 unbroken'},{l:'Row 500m',k:'row500',d:'1:42'},{l:'Run 5km',k:'run5k',d:'22:30'}]},
+  {title:'BENCHMARK WODS — fresh',rows:[{l:'Fran',k:'fran',d:'Sub 7:30'},{l:'Grace',k:'grace',d:'First test'},{l:'Helen',k:'helen',d:'Sub 11:00'},{l:'Diane',k:'diane',d:'First test'}]}
+]},
+{m:3,ph:1,name:'Month 3 — Sep 2026',phLabel:'Phase 1 · Skill locking',
+ focus:'Sailing deload late Aug/early Sep — keep rings + DUs daily during it. Come back to full training mid-Sep. Focus on C2B consistency through fatigue.',
+ tag:'Sailing deload included',
+ tgt:{cj:89,sn:76,bs:129,fs:107,rmu:8,bmu:10,c2b:20,hspu:20,hspu_d:3,hsw:38,du:145,row500:101,run5k:1320,fran:420,grace:330,helen:630,isabel:null,diane:420},
+ groups:[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'89 kg'},{l:'Snatch',k:'sn',d:'76 kg'},{l:'Front squat',k:'fs',d:'107 kg'},{l:'Back squat',k:'bs',d:'129 kg'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu',d:'8 unbroken'},{l:'Bar MU (fresh)',k:'bmu',d:'10 unbroken'},{l:'Butterfly C2B',k:'c2b',d:'20 unbroken'},{l:'Strict HSPU',k:'hspu',d:'20 unbroken'},{l:'Deficit HSPU (10cm)',k:'hspu_d',d:'3 reps'},{l:'HS walks',k:'hsw',d:'38 m'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du',d:'145 unbroken'},{l:'Row 500m',k:'row500',d:'1:41'},{l:'Run 5km',k:'run5k',d:'22:00'}]},
+  {title:'BENCHMARK WODS — fresh',rows:[{l:'Fran',k:'fran',d:'Sub 7:00'},{l:'Grace',k:'grace',d:'Sub 5:30'},{l:'Helen',k:'helen',d:'Sub 10:30'},{l:'Diane',k:'diane',d:'Sub 7:00'}]}
+]},
+{m:4,ph:2,name:'Month 4 — Oct 2026',phLabel:'Phase 2 · Competition simulation',
+ focus:'First full Open simulation WOD — score it properly. All gymnastics now available in metcons. Barbell cycling speed is the priority, not more 1RM.',
+ tag:'First Open simulation',
+ tgt:{cj:91,sn:78,bs:130,fs:109,rmu:9,bmu:10,c2b:25,hspu:22,hspu_d:5,hsw:42,du:155,row500:100,run5k:1290,fran:390,grace:300,helen:600,isabel:330,diane:390},
+ groups:[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'91 kg'},{l:'Snatch',k:'sn',d:'78 kg'},{l:'Front squat',k:'fs',d:'109 kg'},{l:'Back squat',k:'bs',d:'130 kg'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu',d:'9 unbroken'},{l:'Bar MU (fresh)',k:'bmu',d:'10 unbroken'},{l:'Butterfly C2B',k:'c2b',d:'25 unbroken'},{l:'Strict HSPU',k:'hspu',d:'22 unbroken'},{l:'Deficit HSPU (10cm)',k:'hspu_d',d:'5 reps'},{l:'HS walks',k:'hsw',d:'42 m'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du',d:'155 unbroken'},{l:'Row 500m',k:'row500',d:'1:40'},{l:'Run 5km',k:'run5k',d:'21:30'}]},
+  {title:'BENCHMARK WODS — fresh',rows:[{l:'Fran',k:'fran',d:'Sub 6:30'},{l:'Grace',k:'grace',d:'Sub 5:00'},{l:'Helen',k:'helen',d:'Sub 10:00'},{l:'Isabel',k:'isabel',d:'First test'},{l:'Diane',k:'diane',d:'Sub 6:30'}]}
+]},
+{m:5,ph:2,name:'Month 5 — Nov 2026',phLabel:'Phase 2 · Competition simulation',
+ focus:'Open sims every 2 weeks. All skills under fatigue. Push barbell cycling pace — thrusters and snatches at speed, not max effort.',
+ tag:'All Rx skills under fatigue ✓',
+ tgt:{cj:93,sn:80,bs:131,fs:111,rmu:10,bmu:10,c2b:28,hspu:24,hspu_d:7,hsw:48,du:165,row500:99,run5k:1260,fran:360,grace:270,helen:570,isabel:300,diane:360},
+ groups:[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'93 kg'},{l:'Snatch',k:'sn',d:'80 kg'},{l:'Front squat',k:'fs',d:'111 kg'},{l:'Back squat',k:'bs',d:'131 kg'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu',d:'10 unbroken'},{l:'Bar MU (fresh)',k:'bmu',d:'10+ unbroken'},{l:'Butterfly C2B',k:'c2b',d:'28 unbroken'},{l:'Strict HSPU',k:'hspu',d:'24 unbroken'},{l:'Deficit HSPU (10cm)',k:'hspu_d',d:'7 reps'},{l:'HS walks',k:'hsw',d:'48 m'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du',d:'165 unbroken'},{l:'Row 500m',k:'row500',d:'1:39'},{l:'Run 5km',k:'run5k',d:'21:00'}]},
+  {title:'BENCHMARK WODS — fresh',rows:[{l:'Fran',k:'fran',d:'Sub 6:00'},{l:'Grace',k:'grace',d:'Sub 4:30'},{l:'Helen',k:'helen',d:'Sub 9:30'},{l:'Isabel',k:'isabel',d:'Sub 5:00'},{l:'Diane',k:'diane',d:'Sub 6:00'}]}
+]},
+{m:6,ph:2,name:'Month 6 — Dec 2026',phLabel:'Phase 2 · Transition',
+ focus:'Fuerteventura begins. Get a 4-day self-sufficient template from your coach before leaving. Maintain everything. Weekly Open sims.',
+ tag:'Travel to Fuerteventura',
+ tgt:{cj:95,sn:82,bs:132,fs:113,rmu:10,bmu:10,c2b:30,hspu:26,hspu_d:9,hsw:50,du:175,row500:98,run5k:1230,fran:300,grace:240,helen:540,isabel:270,diane:330},
+ groups:[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'95 kg'},{l:'Snatch',k:'sn',d:'82 kg'},{l:'Front squat',k:'fs',d:'113 kg'},{l:'Back squat',k:'bs',d:'132 kg'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu',d:'10 unbroken'},{l:'Bar MU (fresh)',k:'bmu',d:'10+ unbroken'},{l:'Butterfly C2B',k:'c2b',d:'30 unbroken'},{l:'Strict HSPU',k:'hspu',d:'26 unbroken'},{l:'Deficit HSPU (10cm)',k:'hspu_d',d:'9 reps'},{l:'HS walks',k:'hsw',d:'50 m under fatigue'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du',d:'175 unbroken'},{l:'Row 500m',k:'row500',d:'1:38'},{l:'Run 5km',k:'run5k',d:'20:30'}]},
+  {title:'BENCHMARK WODS — fresh',rows:[{l:'Fran',k:'fran',d:'Sub 5:00'},{l:'Grace',k:'grace',d:'Sub 4:00'},{l:'Helen',k:'helen',d:'Sub 9:00'},{l:'Isabel',k:'isabel',d:'Sub 4:30'},{l:'Diane',k:'diane',d:'Sub 5:30'}]}
+]},
+{m:7,ph:3,name:'Month 7 — Jan 2027',phLabel:'Phase 3 · Open prep',
+ focus:'Peak engine work. All benchmarks at target. Learn to pace 3 different WOD styles — long, short, heavy. Weekly Open sims.',
+ tag:null,
+ tgt:{cj:97,sn:84,bs:133,fs:115,rmu:10,bmu:10,c2b:32,hspu:27,hspu_d:10,hsw:50,du:185,row500:97,run5k:1200,fran:270,grace:225,helen:510,isabel:255,diane:300},
+ groups:[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'97 kg'},{l:'Snatch',k:'sn',d:'84 kg'},{l:'Front squat',k:'fs',d:'115 kg'},{l:'Back squat',k:'bs',d:'133 kg'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu',d:'10+ unbroken'},{l:'Bar MU (fresh)',k:'bmu',d:'10+ unbroken'},{l:'Butterfly C2B',k:'c2b',d:'32 unbroken'},{l:'Strict HSPU',k:'hspu',d:'27 unbroken'},{l:'Deficit HSPU (10cm)',k:'hspu_d',d:'10 reps'},{l:'HS walks',k:'hsw',d:'50 m+'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du',d:'185 unbroken'},{l:'Row 500m',k:'row500',d:'1:37'},{l:'Run 5km',k:'run5k',d:'20:00'}]},
+  {title:'BENCHMARK WODS — fresh',rows:[{l:'Fran',k:'fran',d:'Sub 4:30'},{l:'Grace',k:'grace',d:'Sub 3:45'},{l:'Helen',k:'helen',d:'Sub 8:30'},{l:'Isabel',k:'isabel',d:'Sub 4:15'},{l:'Diane',k:'diane',d:'Sub 5:00'}]}
+]},
+{m:8,ph:3,name:'Month 8 — Feb 2027',phLabel:'Phase 3 · Open prep',
+ focus:'Taper — volume -15%, intensity stays. Sleep and nutrition locked in. Two judged Open simulations this month.',
+ tag:'C&J 100 kg ✓',
+ tgt:{cj:99,sn:86,bs:134,fs:117,rmu:10,bmu:10,c2b:35,hspu:28,hspu_d:10,hsw:50,du:200,row500:95,run5k:1200,fran:240,grace:210,helen:510,isabel:240,diane:300},
+ groups:[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'99 kg'},{l:'Snatch',k:'sn',d:'86 kg'},{l:'Front squat',k:'fs',d:'117 kg'},{l:'Back squat',k:'bs',d:'134 kg'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu',d:'10+ smooth'},{l:'Bar MU (fresh)',k:'bmu',d:'10+ smooth'},{l:'Butterfly C2B',k:'c2b',d:'35 unbroken'},{l:'Strict HSPU',k:'hspu',d:'28 unbroken'},{l:'Deficit HSPU (10cm)',k:'hspu_d',d:'10 reps'},{l:'HS walks',k:'hsw',d:'Open-ready'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du',d:'200 unbroken'},{l:'Row 500m',k:'row500',d:'1:35'},{l:'Run 5km',k:'run5k',d:'20:00'}]},
+  {title:'BENCHMARK WODS — fresh',rows:[{l:'Fran',k:'fran',d:'Sub 4:00'},{l:'Grace',k:'grace',d:'Sub 3:30'},{l:'Helen',k:'helen',d:'Sub 8:30'},{l:'Isabel',k:'isabel',d:'Sub 4:00'},{l:'Diane',k:'diane',d:'Sub 5:00'}]}
+]},
+{m:9,ph:3,name:'Month 9 — Mar 2027',phLabel:'Open 2027',
+ focus:'Open month. Volume -20% in 5 days before each workout. No new skills. Peak for each of the 3 workouts individually. You are ready.',
+ tag:null,
+ tgt:{cj:102,sn:88,bs:135,fs:118,rmu:10,bmu:10,c2b:35,hspu:29,hspu_d:10,hsw:50,du:200,row500:95,run5k:1200,fran:240,grace:210,helen:510,isabel:240,diane:300},
+ groups:[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'100-103 kg'},{l:'Snatch',k:'sn',d:'87-90 kg'},{l:'Front squat',k:'fs',d:'117-120 kg'},{l:'Back squat',k:'bs',d:'133-136 kg'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu',d:'10+ under fatigue ✓'},{l:'Bar MU (fresh)',k:'bmu',d:'10+ smooth ✓'},{l:'Butterfly C2B',k:'c2b',d:'35+ unbroken ✓'},{l:'Strict HSPU',k:'hspu',d:'28-30 ✓'},{l:'Deficit HSPU (10cm)',k:'hspu_d',d:'10+ ✓'},{l:'HS walks',k:'hsw',d:'Open-ready ✓'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du',d:'200+ / instant recovery'},{l:'Row 500m',k:'row500',d:'Sub 1:35'},{l:'Run 5km',k:'run5k',d:'Sub 20:00'}]},
+  {title:'THE OPEN',rows:[{l:'Open 27.1',k:null,d:'Complete Rx'},{l:'Open 27.2',k:null,d:'Complete Rx'},{l:'Open 27.3',k:null,d:'Complete Rx'}]}
+]}
+];
+
+var METRICS={
+  cj:{label:'C&J',unit:'kg',isTime:false},sn:{label:'Snatch',unit:'kg',isTime:false},
+  bs:{label:'Back squat',unit:'kg',isTime:false},fs:{label:'Front squat',unit:'kg',isTime:false},
+  rmu:{label:'Ring MU',unit:'reps',isTime:false},bmu:{label:'Bar MU',unit:'reps',isTime:false},
+  c2b:{label:'Butterfly C2B',unit:'reps',isTime:false},hspu:{label:'Strict HSPU',unit:'reps',isTime:false},
+  hspu_d:{label:'Deficit HSPU',unit:'reps',isTime:false},hsw:{label:'HS walk',unit:'m',isTime:false},
+  du:{label:'Double-unders',unit:'reps',isTime:false},bw:{label:'Bodyweight',unit:'kg',isTime:false},
+  row500:{label:'Row 500m',unit:'time',isTime:true},run5k:{label:'Run 5km',unit:'time',isTime:true},
+  fran:{label:'Fran',unit:'time',isTime:true},grace:{label:'Grace',unit:'time',isTime:true},
+  helen:{label:'Helen',unit:'time',isTime:true},isabel:{label:'Isabel',unit:'time',isTime:true},
+  diane:{label:'Diane',unit:'time',isTime:true}
+};
+
+// ── CUSTOM PLAN ────────────────────────────────────────────────────────────
+var CUSTOM={
+  data:{},
+  getFocus:function(mi){return(this.data[mi]&&this.data[mi].focus!==undefined)?this.data[mi].focus:PLAN[mi].focus;},
+  getTag:function(mi){return(this.data[mi]&&this.data[mi].tag!==undefined)?this.data[mi].tag:PLAN[mi].tag;},
+  getTgt:function(mi,k){return(this.data[mi]&&this.data[mi].tgt&&this.data[mi].tgt[k]!==undefined)?this.data[mi].tgt[k]:PLAN[mi].tgt[k];},
+  getDsp:function(mi,gi,ri){var id=gi+'_'+ri;return(this.data[mi]&&this.data[mi].dsp&&this.data[mi].dsp[id]!==undefined)?this.data[mi].dsp[id]:PLAN[mi].groups[gi].rows[ri].d;},
+  hasEdits:function(mi){return!!this.data[mi];},
+  reset:function(mi){delete this.data[mi];saveAll();}
+};
+
+// ── IN-MEMORY DATA ─────────────────────────────────────────────────────────
+var DB={
+  logs:[],notes:[],
+  addLog:function(e){this.logs.push(e);this.logs.sort(function(a,b){return a.date<b.date?-1:1;});saveAll();},
+  addNote:function(n){this.notes.unshift(n);saveAll();},
+  deleteNote:function(i){this.notes.splice(i,1);saveAll();},
+  latest:function(k){for(var i=this.logs.length-1;i>=0;i--){var v=this.logs[i].metrics[k];if(v!==null&&v!==undefined&&v!=='')return v;}return null;},
+  history:function(k){var r=[];this.logs.forEach(function(l){var v=l.metrics[k];if(v!==null&&v!==undefined&&v!=='')r.push({date:l.date,value:v});});return r;}
+};
+
+// ── SYNC ───────────────────────────────────────────────────────────────────
+function fetchT(url,opts){
+  return new Promise(function(res,rej){
+    var t=setTimeout(function(){rej(new Error('timeout'));},6000);
+    fetch(url,opts).then(function(r){clearTimeout(t);res(r);}).catch(function(e){clearTimeout(t);rej(e);});
+  });
+}
+
+function setSyncStatus(s){
+  var el=document.getElementById('syncStatus');if(!el)return;
+  var states={synced:{c:'#1D9E75',t:'● synced'},cached:{c:'#BA7517',t:'◌ offline (cached)'},offline:{c:'#BA7517',t:'◌ offline'},error:{c:'#E24B4A',t:'✕ sync error'},saving:{c:'#378ADD',t:'↑ saving…'}};
+  var st=states[s]||states.offline;
+  el.style.color=st.c;el.textContent=st.t;
+}
+
+async function loadData(){
+  try{
+    var r=await fetchT(API_URL,{headers:{'X-Key':API_KEY}});
+    if(r.ok){
+      var d=await r.json();
+      DB.logs=Array.isArray(d.logs)?d.logs:[];
+      DB.notes=Array.isArray(d.notes)?d.notes:[];
+      CUSTOM.data=d.plan||{};
+      try{localStorage.setItem('cf27_cache',JSON.stringify({logs:DB.logs,notes:DB.notes,plan:CUSTOM.data}));}catch(e){}
+      setSyncStatus('synced');return;
+    }
+  }catch(e){}
+  try{
+    var cached=localStorage.getItem('cf27_cache');
+    if(cached){var d=JSON.parse(cached);DB.logs=Array.isArray(d.logs)?d.logs:[];DB.notes=Array.isArray(d.notes)?d.notes:[];CUSTOM.data=d.plan||{};}
+  }catch(e){}
+  setSyncStatus('cached');
+}
+
+var saveTimer=null;
+function saveAll(){
+  // Debounce: wait 400ms after last change
+  if(saveTimer)clearTimeout(saveTimer);
+  saveTimer=setTimeout(function(){doSave();},400);
+}
+
+async function doSave(){
+  var payload={logs:DB.logs,notes:DB.notes,plan:CUSTOM.data};
+  try{localStorage.setItem('cf27_cache',JSON.stringify(payload));}catch(e){}
+  setSyncStatus('saving');
+  try{
+    var r=await fetchT(API_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Key':API_KEY},body:JSON.stringify(payload)});
+    setSyncStatus(r.ok?'synced':'error');
+  }catch(e){
+    setSyncStatus('offline');
+  }
+}
+
+// ── UTILS ──────────────────────────────────────────────────────────────────
+function s2t(s){if(s===null||s===undefined)return null;s=Math.round(s);var m=Math.floor(s/60),sec=s%60;return m+':'+(sec<10?'0':'')+sec;}
+function t2s(str){if(!str||!str.trim())return null;var p=str.trim().split(':');if(p.length===2){var m=parseInt(p[0]),s=parseInt(p[1]);if(!isNaN(m)&&!isNaN(s))return m*60+s;}return null;}
+function today(){return new Date().toISOString().split('T')[0];}
+function fmtVal(v,isTime){if(v===null||v===undefined)return null;return isTime?s2t(v):v;}
+function cmp(actual,target,isTime){
+  if(actual===null||actual===undefined||target===null||target===undefined)return 'n';
+  if(isTime)return actual<=target*1.03?'g':actual<=target*1.13?'y':'r';
+  return actual>=target*0.97?'g':actual>=target*0.87?'y':'r';
+}
+var BC={g:'bg-g',y:'bg-y',r:'bg-r',n:'bg-n'};
+function phDotCol(ph){return['#1D9E75','#378ADD','#BA7517'][ph-1];}
+function escHtml(s){if(!s)return'';return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+// ── PLAN — VIEW ────────────────────────────────────────────────────────────
+var curM=0,isEdit=false;
+
+function renderDots(){
+  var h='';
+  for(var i=0;i<9;i++){
+    var ph=PLAN[i].ph;
+    var cl=i===curM?' active" style="background:'+phDotCol(ph)+'"':'"';
+    h+='<div class="dot'+cl+'></div>';
+  }
+  document.getElementById('dotsRow').innerHTML=h;
+}
+
+function renderPlan(){
+  var d=PLAN[curM];
+  document.getElementById('mName').textContent=d.name;
+  document.getElementById('mPhase').textContent=d.phLabel;
+  renderDots();
+  document.getElementById('prevM').disabled=curM===0;
+  document.getElementById('nextM').disabled=curM===8;
+  var tb='';
+  if(!isEdit){
+    tb+='<button class="tool-btn" onclick="enterEdit()">Edit targets</button>';
+    if(CUSTOM.hasEdits(curM))tb+='<button class="tool-btn danger" onclick="resetMonth()">Reset defaults</button>';
+  }
+  document.getElementById('planToolbar').innerHTML=tb;
+  if(isEdit){renderPlanEdit(d);}else{renderPlanView(d);}
+}
+
+function renderPlanView(d){
+  var pc='ph'+d.ph,msc='ms'+d.ph;
+  var h='';
+  h+='<div class="focus-box"><div class="focus-lbl">FOCUS</div><div class="focus-txt">'+CUSTOM.getFocus(curM)+'</div>';
+  var tag=CUSTOM.getTag(curM);
+  if(tag)h+='<div><span class="ms-tag '+msc+'">'+tag+'</span></div>';
+  h+='</div>';
+  d.groups.forEach(function(g,gi){
+    h+='<div class="card '+pc+'"><div class="card-hd">'+g.title+'</div>';
+    g.rows.forEach(function(r,ri){
+      var m=r.k?METRICS[r.k]:null;
+      var actual=r.k?DB.latest(r.k):null;
+      var tgt=r.k?CUSTOM.getTgt(curM,r.k):null;
+      var status=m?cmp(actual,tgt,m.isTime):'n';
+      var dsp=CUSTOM.getDsp(curM,gi,ri);
+      h+='<div class="row"><span class="row-lbl">'+r.l+'</span>';
+      h+='<div class="row-right"><span class="row-tgt">'+dsp+'</span>';
+      if(actual!==null&&r.k){var disp=fmtVal(actual,m.isTime);var unit=m.isTime?'':(m.unit==='kg'?' kg':m.unit==='m'?' m':'');h+='<span class="badge '+BC[status]+'">'+disp+unit+'</span>';}
+      h+='</div></div>';
+    });
+    h+='</div>';
+  });
+  document.getElementById('planContent').innerHTML=h;
+}
+
+function enterEdit(){isEdit=true;renderPlan();}
+function cancelEdit(){isEdit=false;renderPlan();}
+
+function renderPlanEdit(d){
+  var pc='ph'+d.ph;
+  var h='';
+  h+='<div class="focus-box"><div class="focus-lbl">FOCUS</div>';
+  h+='<textarea id="edit-focus" style="margin-top:6px;min-height:90px;">'+escHtml(CUSTOM.getFocus(curM))+'</textarea>';
+  h+='<div style="margin-top:8px;"><input type="text" id="edit-tag" placeholder="Milestone tag (optional)" style="width:100%;font-size:12px;" value="'+escHtml(CUSTOM.getTag(curM)||'')+'"></div>';
+  h+='</div>';
+  h+='<p class="edit-note">Left field: display text. Right field: numeric target (used for badge comparison).</p>';
+  d.groups.forEach(function(g,gi){
+    h+='<div class="card '+pc+'"><div class="card-hd">'+g.title+'</div>';
+    g.rows.forEach(function(r,ri){
+      var curDsp=CUSTOM.getDsp(curM,gi,ri);
+      var curTgt=r.k?CUSTOM.getTgt(curM,r.k):null;
+      var m=r.k?METRICS[r.k]:null;
+      h+='<div class="row edit-row"><span class="row-lbl">'+r.l+'</span><div class="edit-inputs">';
+      h+='<input type="text" class="dsp-inp" data-gi="'+gi+'" data-ri="'+ri+'" value="'+escHtml(curDsp)+'">';
+      if(r.k&&m){
+        var tgtDisp=(curTgt!==null&&curTgt!==undefined)?(m.isTime?s2t(curTgt):curTgt):'';
+        if(m.isTime){h+='<input type="text" class="tgt-inp tgt-time" data-key="'+r.k+'" placeholder="mm:ss" value="'+tgtDisp+'">';}
+        else{h+='<input type="number" class="tgt-inp" data-key="'+r.k+'" step="0.5" placeholder="num" value="'+tgtDisp+'">';}
+      }
+      h+='</div></div>';
+    });
+    h+='</div>';
+  });
+  h+='<div class="edit-actions"><button class="tool-btn primary" onclick="saveEdit()" style="flex:2;padding:12px;">Save changes</button><button class="tool-btn" onclick="cancelEdit()" style="flex:1;padding:12px;">Cancel</button></div>';
+  document.getElementById('planToolbar').innerHTML='';
+  document.getElementById('planContent').innerHTML=h;
+}
+
+function saveEdit(){
+  if(!CUSTOM.data[curM])CUSTOM.data[curM]={tgt:{},dsp:{},focus:'',tag:''};
+  var ed=CUSTOM.data[curM];
+  var focusEl=document.getElementById('edit-focus');var tagEl=document.getElementById('edit-tag');
+  if(focusEl)ed.focus=focusEl.value.trim();if(tagEl)ed.tag=tagEl.value.trim()||null;
+  if(!ed.dsp)ed.dsp={};if(!ed.tgt)ed.tgt={};
+  document.querySelectorAll('.dsp-inp').forEach(function(el){ed.dsp[el.getAttribute('data-gi')+'_'+el.getAttribute('data-ri')]=el.value;});
+  document.querySelectorAll('.tgt-inp').forEach(function(el){
+    var key=el.getAttribute('data-key');
+    if(el.classList.contains('tgt-time')){var secs=t2s(el.value);if(secs!==null)ed.tgt[key]=secs;}
+    else{var val=parseFloat(el.value);if(!isNaN(val))ed.tgt[key]=val;}
+  });
+  saveAll();isEdit=false;renderPlan();showToast('Plan updated ✓');
+}
+
+function resetMonth(){if(!confirm('Reset Month '+(curM+1)+' to defaults?'))return;CUSTOM.reset(curM);renderPlan();showToast('Reset ✓');}
+function changeM(d){curM=Math.max(0,Math.min(8,curM+d));isEdit=false;renderPlan();}
+
+// ── LOG ────────────────────────────────────────────────────────────────────
+var NUM_KEYS=['cj','sn','bs','fs','rmu','bmu','c2b','hspu','hspu_d','hsw','du','bw'];
+var TIME_KEYS=['row500','run5k','fran','grace','helen','isabel','diane'];
+
+function saveLog(){
+  var metrics={};
+  NUM_KEYS.forEach(function(k){var el=document.getElementById('l_'+k);metrics[k]=(el&&el.value!=='')?parseFloat(el.value):null;});
+  TIME_KEYS.forEach(function(k){var el=document.getElementById('l_'+k);metrics[k]=(el&&el.value.trim()!=='')?t2s(el.value):null;});
+  var note=document.getElementById('l_note').value.trim();
+  var date=document.getElementById('logDate').value||today();
+  var hasData=note||Object.keys(metrics).some(function(k){return metrics[k]!==null;});
+  if(!hasData){showToast('Enter at least one value');return;}
+  DB.addLog({date:date,metrics:metrics,note:note});
+  NUM_KEYS.concat(TIME_KEYS).forEach(function(k){var el=document.getElementById('l_'+k);if(el)el.value='';});
+  document.getElementById('l_note').value='';
+  document.getElementById('logDate').value=today();
+  showToast('Saved ✓');renderPlan();renderRecentLogs();
+}
+
+function renderRecentLogs(){
+  var logs=DB.logs.slice().reverse().slice(0,6);
+  if(!logs.length){document.getElementById('recentLogs').innerHTML='<div class="empty">No entries yet.</div>';return;}
+  var h='';
+  logs.forEach(function(l){
+    h+='<div class="log-entry"><div class="log-date">'+l.date+'</div><div class="log-pills">';
+    Object.keys(METRICS).forEach(function(k){var v=l.metrics[k];if(v!==null&&v!==undefined){var m=METRICS[k];h+='<span class="log-pill">'+m.label+': '+fmtVal(v,m.isTime)+(m.isTime?'':' '+m.unit)+'</span>';}});
+    h+='</div>';if(l.note)h+='<div class="log-note">"'+l.note+'"</div>';h+='</div>';
+  });
+  document.getElementById('recentLogs').innerHTML=h;
+}
+
+// ── PROGRESS ───────────────────────────────────────────────────────────────
+var progChart=null;
+var MONTH_DATES=['2026-07-01','2026-08-01','2026-09-01','2026-10-01','2026-11-01','2026-12-01','2027-01-01','2027-02-01','2027-03-01'];
+
+function renderProgress(){
+  var key=document.getElementById('metricSel').value;var m=METRICS[key];if(!m)return;
+  var history=DB.history(key);var latest=DB.latest(key);
+  var curIdx=getCurMonthIdx();var nextTgt=null,nextName='';
+  for(var i=curIdx;i<PLAN.length;i++){var t=CUSTOM.getTgt(i,key);if(t!==null&&t!==undefined){nextTgt=t;nextName=PLAN[i].name.split('—')[1].trim();break;}}
+  var statH='';
+  statH+='<div class="stat-card"><div class="stat-lbl">CURRENT BEST</div><div class="stat-val">'+(latest!==null?fmtVal(latest,m.isTime):'—')+'<span class="stat-unit"> '+m.unit+'</span></div></div>';
+  statH+='<div class="stat-card"><div class="stat-lbl">TARGET '+(nextName||'').toUpperCase()+'</div><div class="stat-val">'+(nextTgt!==null?fmtVal(nextTgt,m.isTime):'—')+'<span class="stat-unit"> '+m.unit+'</span></div></div>';
+  document.getElementById('statGrid').innerHTML=statH;
+  var tgtMap={};PLAN.forEach(function(p,i){var t=CUSTOM.getTgt(i,key);if(t!==null&&t!==undefined)tgtMap[MONTH_DATES[i]]=t;});
+  var actMap={};history.forEach(function(h){actMap[h.date]=h.value;});
+  var allDates=[];Object.keys(tgtMap).forEach(function(d){if(allDates.indexOf(d)<0)allDates.push(d);});history.forEach(function(h){if(allDates.indexOf(h.date)<0)allDates.push(h.date);});allDates.sort();
+  var tgtArr=allDates.map(function(d){return tgtMap[d]!==undefined?tgtMap[d]:null;});
+  var actArr=allDates.map(function(d){return actMap[d]!==undefined?actMap[d]:null;});
+  if(progChart){progChart.destroy();progChart=null;}
+  var ctx=document.getElementById('progChart').getContext('2d');
+  progChart=new Chart(ctx,{type:'line',data:{labels:allDates,datasets:[
+    {label:'Target',data:tgtArr,borderColor:'#1D9E75',borderDash:[5,4],borderWidth:2,pointRadius:4,pointBackgroundColor:'#1D9E75',fill:false,spanGaps:false,tension:0.3},
+    {label:'Actual',data:actArr,borderColor:'#111110',borderWidth:2.5,pointRadius:5,pointBackgroundColor:'#111110',fill:false,spanGaps:false,tension:0.2}
+  ]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},scales:{
+    x:{grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{family:'Inter',size:11},color:'#aaa',maxRotation:45}},
+    y:{reverse:m.isTime,grid:{color:'rgba(0,0,0,0.05)'},ticks:{font:{family:'Inter',size:11},color:'#aaa',callback:function(v){return m.isTime?s2t(v):v;}}}
+  },plugins:{legend:{display:false},tooltip:{callbacks:{label:function(ctx){var v=ctx.raw;if(v===null)return null;return ctx.dataset.label+': '+fmtVal(v,m.isTime)+(m.isTime?'':' '+m.unit);}}}}}});
+  var lh='';DB.history(key).reverse().forEach(function(e){lh+='<div class="log-entry"><div class="log-date">'+e.date+'</div><div class="log-pills"><span class="log-pill">'+m.label+': '+fmtVal(e.value,m.isTime)+(m.isTime?'':' '+m.unit)+'</span></div></div>';});
+  document.getElementById('logHistory').innerHTML=lh;
+}
+
+function getCurMonthIdx(){
+  var now=new Date();var y=now.getFullYear();var mo=now.getMonth()+1;
+  var map={'2026-7':0,'2026-8':1,'2026-9':2,'2026-10':3,'2026-11':4,'2026-12':5,'2027-1':6,'2027-2':7,'2027-3':8};
+  return map[y+'-'+mo]!==undefined?map[y+'-'+mo]:0;
+}
+
+// ── NOTES ──────────────────────────────────────────────────────────────────
+function saveNote(){var t=document.getElementById('quickNote').value.trim();if(!t){showToast('Write something first');return;}DB.addNote({date:today(),text:t});document.getElementById('quickNote').value='';showToast('Note saved ✓');renderNotes();}
+function deleteNote(i){if(!confirm('Delete?'))return;DB.deleteNote(i);renderNotes();}
+function renderNotes(){
+  if(!DB.notes.length){document.getElementById('notesList').innerHTML='<div class="empty">No notes yet.</div>';return;}
+  var h='';DB.notes.forEach(function(n,i){h+='<div class="note-card"><button class="del-btn" onclick="deleteNote('+i+')" title="Delete">×</button><div class="note-card-date">'+n.date+'</div><div class="note-card-text">'+n.text.replace(/\n/g,'<br>')+'</div></div>';});
+  document.getElementById('notesList').innerHTML=h;
+}
+
+// ── TABS ───────────────────────────────────────────────────────────────────
+function showTab(name){
+  ['plan','log','progress','notes'].forEach(function(t){
+    document.getElementById('pane-'+t).classList.toggle('active',t===name);
+    document.getElementById('tab-'+t).classList.toggle('active',t===name);
+  });
+  if(name==='progress')renderProgress();
+  if(name==='notes')renderNotes();
+  if(name==='log')renderRecentLogs();
+}
+
+// ── TOAST ──────────────────────────────────────────────────────────────────
+function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}
+
+// ── INIT ───────────────────────────────────────────────────────────────────
+document.getElementById('logDate').value=today();
+document.getElementById('planContent').innerHTML='<div class="empty" style="padding:60px 20px;">Loading...</div>';
+
+loadData().then(function(){
+  curM=getCurMonthIdx();
+  renderPlan();renderRecentLogs();renderNotes();
+});
+</script>
+</body>
+</html>
