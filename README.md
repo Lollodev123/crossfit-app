@@ -6,7 +6,7 @@ A goal-based CrossFit training tracker: set a timeframe and your starting number
 
 ## The problem, and who it's for
 
-I wanted one place to hold a training plan and check real numbers against it, instead of a plan sitting in Notes and PRs scattered across old workout logs. It started as my own prep plan for the 2027 CrossFit Open, then I generalized it: anyone working toward Rx level can set how long they've got (6 months to 3 years) and where they're starting from, and get a plan that ramps toward a standard Rx target instead of a guess.
+I wanted one place to hold a training plan and check real numbers against it, instead of a plan sitting in Notes and PRs scattered across old workout logs. It's basically my own prep plan for the 2027 CrossFit Open, then I generalized it: anyone working toward Rx level can set how long they've got (6 months to 3 years) and where they're starting from, and get a plan that ramps toward a standard Rx target instead of a guess.
 
 ## What works today
 
