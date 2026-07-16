@@ -1,6 +1,7 @@
 # crossfit-app
 
 A goal-based CrossFit training tracker: set a timeframe and your starting numbers, get a month-by-month plan toward Rx-level targets, log training against it, watch the gap close.
+It's a small personal project, local-first.
 
 ![Plan view, populated with the example prep plan](docs/screenshot-plan.png)
 
