@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CF Open 2027 — Tracker</title>
+<title>CrossFit Goal Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -107,7 +107,7 @@ input:focus,textarea:focus,select:focus{border-color:#1D9E75;}
 <div class="page">
 
 <div class="app-hdr">
-  <span class="app-hdr-title">CROSSFIT OPEN 2027</span>
+  <span class="app-hdr-title">CROSSFIT GOAL TRACKER</span>
   <div class="hdr-right">
     <span id="syncStatus" style="color:#ccc;">○ connecting</span>
     <div class="dots-row" id="dotsRow"></div>
@@ -208,8 +208,62 @@ input:focus,textarea:focus,select:focus{border-color:#1D9E75;}
   <div id="logHistory"></div>
 </div>
 
+<!-- ONBOARDING -->
+<div class="pane" id="pane-onboard">
+  <div class="form-hd" style="margin-top:0;">Get started</div>
+  <div class="card">
+    <div class="card-hd">LOAD EXAMPLE</div>
+    <p class="focus-txt" style="margin-bottom:12px;">See the app populated with a real 9-month CrossFit Open prep plan, targets and all.</p>
+    <button class="tool-btn primary" onclick="loadExamplePlan()">Load example plan</button>
+  </div>
+  <div class="form-hd">Build my plan</div>
+  <div class="card" style="padding:6px 16px;">
+    <div class="inp-row"><span class="inp-lbl">Duration</span><select id="ob_months" style="width:145px;">
+      <option value="6">6 months</option>
+      <option value="9" selected>9 months</option>
+      <option value="12">12 months</option>
+      <option value="18">18 months</option>
+      <option value="24">24 months</option>
+      <option value="36">36 months</option>
+    </select></div>
+  </div>
+  <p class="edit-note">Fill in what applies — everything is optional. Blank metrics won't get a target.</p>
+  <div class="form-hd">Barbell — 1RM (kg)</div>
+  <div class="card" style="padding:6px 16px;">
+    <div class="inp-row"><span class="inp-lbl">Clean & Jerk</span><input type="number" id="ob_cj" placeholder="—" step="0.5"></div>
+    <div class="inp-row"><span class="inp-lbl">Snatch</span><input type="number" id="ob_sn" placeholder="—" step="0.5"></div>
+    <div class="inp-row"><span class="inp-lbl">Back squat</span><input type="number" id="ob_bs" placeholder="—" step="0.5"></div>
+    <div class="inp-row"><span class="inp-lbl">Front squat</span><input type="number" id="ob_fs" placeholder="—" step="0.5"></div>
+  </div>
+  <div class="form-hd">Gymnastics — max fresh</div>
+  <div class="card" style="padding:6px 16px;">
+    <div class="inp-row"><span class="inp-lbl">Ring MU<span class="inp-sub">unbroken</span></span><input type="number" id="ob_rmu" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Bar MU<span class="inp-sub">unbroken</span></span><input type="number" id="ob_bmu" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Butterfly C2B<span class="inp-sub">unbroken</span></span><input type="number" id="ob_c2b" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Strict HSPU</span><input type="number" id="ob_hspu" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Deficit HSPU 10cm</span><input type="number" id="ob_hspu_d" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">HS walk<span class="inp-sub">meters</span></span><input type="number" id="ob_hsw" placeholder="—"></div>
+  </div>
+  <div class="form-hd">Engine</div>
+  <div class="card" style="padding:6px 16px;">
+    <div class="inp-row"><span class="inp-lbl">Double-unders<span class="inp-sub">max unbroken</span></span><input type="number" id="ob_du" placeholder="—"></div>
+    <div class="inp-row"><span class="inp-lbl">Row 500m<span class="inp-sub">mm:ss</span></span><input type="text" class="ti" id="ob_row500" placeholder="1:45"></div>
+    <div class="inp-row"><span class="inp-lbl">Run 5km<span class="inp-sub">mm:ss</span></span><input type="text" class="ti" id="ob_run5k" placeholder="22:00"></div>
+  </div>
+  <div class="form-hd">Benchmark WODs — fresh, rested (mm:ss)</div>
+  <div class="card" style="padding:6px 16px;">
+    <div class="inp-row"><span class="inp-lbl">Fran</span><input type="text" class="ti" id="ob_fran" placeholder="—:——"></div>
+    <div class="inp-row"><span class="inp-lbl">Grace</span><input type="text" class="ti" id="ob_grace" placeholder="—:——"></div>
+    <div class="inp-row"><span class="inp-lbl">Helen</span><input type="text" class="ti" id="ob_helen" placeholder="—:——"></div>
+    <div class="inp-row"><span class="inp-lbl">Isabel</span><input type="text" class="ti" id="ob_isabel" placeholder="—:——"></div>
+    <div class="inp-row"><span class="inp-lbl">Diane</span><input type="text" class="ti" id="ob_diane" placeholder="—:——"></div>
+  </div>
+  <button class="save-btn" onclick="buildMyPlan()">Build my plan</button>
+</div>
+
 <!-- NOTES -->
 <div class="pane" id="pane-notes">
+  <button class="tool-btn" onclick="changePlanSetup()" style="margin-bottom:16px;">Change plan setup</button>
   <div class="form-hd">New note</div>
   <textarea id="quickNote" placeholder="Training thoughts, wins, setbacks, what clicked today..."></textarea>
   <button class="save-btn" onclick="saveNote()" style="margin-top:8px;">Save note</button>
@@ -233,10 +287,11 @@ var API_KEY = 'CF_SECRET_KEY_PLACEHOLDER'; // replaced by setup.sh
 var API_URL = '/api/data';
 
 // ── PLAN DATA ──────────────────────────────────────────────────────────────
-var PLAN=[
+var EXAMPLE_PRESET_PLAN=[
 {m:1,ph:1,name:'Month 1 — Jul 2026',phLabel:'Phase 1 · Skill locking',
  focus:'Van travel mid-month: bring rings + jump rope, train every day. Biggest gap right now is butterfly C2B — drill rhythm before reps. Let the oly coach own the barbell.',
  tag:null,
+ date:'2026-07-01',
  tgt:{cj:84,sn:72,bs:127,fs:103,rmu:6,bmu:7,c2b:10,hspu:17,hspu_d:null,hsw:30,du:100,row500:104,run5k:1380,fran:540,grace:null,helen:690,isabel:null,diane:null},
  groups:[
   {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'84 kg'},{l:'Snatch',k:'sn',d:'72 kg'},{l:'Front squat',k:'fs',d:'103 kg'},{l:'Back squat',k:'bs',d:'127 kg'}]},
@@ -247,6 +302,7 @@ var PLAN=[
 {m:2,ph:1,name:'Month 2 — Aug 2026',phLabel:'Phase 1 · Skill locking',
  focus:'C2B rhythm clicks into WODs. Ring + bar MUs cycling in metcons. DUs consistent at 130. Test Grace and Diane for the first time.',
  tag:null,
+ date:'2026-08-01',
  tgt:{cj:87,sn:74,bs:128,fs:105,rmu:8,bmu:9,c2b:15,hspu:19,hspu_d:3,hsw:35,du:130,row500:102,run5k:1350,fran:450,grace:480,helen:660,isabel:null,diane:480},
  groups:[
   {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'87 kg'},{l:'Snatch',k:'sn',d:'74 kg'},{l:'Front squat',k:'fs',d:'105 kg'},{l:'Back squat',k:'bs',d:'128 kg'}]},
@@ -257,6 +313,7 @@ var PLAN=[
 {m:3,ph:1,name:'Month 3 — Sep 2026',phLabel:'Phase 1 · Skill locking',
  focus:'Sailing deload late Aug/early Sep — keep rings + DUs daily during it. Come back to full training mid-Sep. Focus on C2B consistency through fatigue.',
  tag:'Sailing deload included',
+ date:'2026-09-01',
  tgt:{cj:89,sn:76,bs:129,fs:107,rmu:8,bmu:10,c2b:20,hspu:20,hspu_d:3,hsw:38,du:145,row500:101,run5k:1320,fran:420,grace:330,helen:630,isabel:null,diane:420},
  groups:[
   {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'89 kg'},{l:'Snatch',k:'sn',d:'76 kg'},{l:'Front squat',k:'fs',d:'107 kg'},{l:'Back squat',k:'bs',d:'129 kg'}]},
@@ -267,6 +324,7 @@ var PLAN=[
 {m:4,ph:2,name:'Month 4 — Oct 2026',phLabel:'Phase 2 · Competition simulation',
  focus:'First full Open simulation WOD — score it properly. All gymnastics now available in metcons. Barbell cycling speed is the priority, not more 1RM.',
  tag:'First Open simulation',
+ date:'2026-10-01',
  tgt:{cj:91,sn:78,bs:130,fs:109,rmu:9,bmu:10,c2b:25,hspu:22,hspu_d:5,hsw:42,du:155,row500:100,run5k:1290,fran:390,grace:300,helen:600,isabel:330,diane:390},
  groups:[
   {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'91 kg'},{l:'Snatch',k:'sn',d:'78 kg'},{l:'Front squat',k:'fs',d:'109 kg'},{l:'Back squat',k:'bs',d:'130 kg'}]},
@@ -277,6 +335,7 @@ var PLAN=[
 {m:5,ph:2,name:'Month 5 — Nov 2026',phLabel:'Phase 2 · Competition simulation',
  focus:'Open sims every 2 weeks. All skills under fatigue. Push barbell cycling pace — thrusters and snatches at speed, not max effort.',
  tag:'All Rx skills under fatigue ✓',
+ date:'2026-11-01',
  tgt:{cj:93,sn:80,bs:131,fs:111,rmu:10,bmu:10,c2b:28,hspu:24,hspu_d:7,hsw:48,du:165,row500:99,run5k:1260,fran:360,grace:270,helen:570,isabel:300,diane:360},
  groups:[
   {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'93 kg'},{l:'Snatch',k:'sn',d:'80 kg'},{l:'Front squat',k:'fs',d:'111 kg'},{l:'Back squat',k:'bs',d:'131 kg'}]},
@@ -287,6 +346,7 @@ var PLAN=[
 {m:6,ph:2,name:'Month 6 — Dec 2026',phLabel:'Phase 2 · Transition',
  focus:'Fuerteventura begins. Get a 4-day self-sufficient template from your coach before leaving. Maintain everything. Weekly Open sims.',
  tag:'Travel to Fuerteventura',
+ date:'2026-12-01',
  tgt:{cj:95,sn:82,bs:132,fs:113,rmu:10,bmu:10,c2b:30,hspu:26,hspu_d:9,hsw:50,du:175,row500:98,run5k:1230,fran:300,grace:240,helen:540,isabel:270,diane:330},
  groups:[
   {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'95 kg'},{l:'Snatch',k:'sn',d:'82 kg'},{l:'Front squat',k:'fs',d:'113 kg'},{l:'Back squat',k:'bs',d:'132 kg'}]},
@@ -297,6 +357,7 @@ var PLAN=[
 {m:7,ph:3,name:'Month 7 — Jan 2027',phLabel:'Phase 3 · Open prep',
  focus:'Peak engine work. All benchmarks at target. Learn to pace 3 different WOD styles — long, short, heavy. Weekly Open sims.',
  tag:null,
+ date:'2027-01-01',
  tgt:{cj:97,sn:84,bs:133,fs:115,rmu:10,bmu:10,c2b:32,hspu:27,hspu_d:10,hsw:50,du:185,row500:97,run5k:1200,fran:270,grace:225,helen:510,isabel:255,diane:300},
  groups:[
   {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'97 kg'},{l:'Snatch',k:'sn',d:'84 kg'},{l:'Front squat',k:'fs',d:'115 kg'},{l:'Back squat',k:'bs',d:'133 kg'}]},
@@ -307,6 +368,7 @@ var PLAN=[
 {m:8,ph:3,name:'Month 8 — Feb 2027',phLabel:'Phase 3 · Open prep',
  focus:'Taper — volume -15%, intensity stays. Sleep and nutrition locked in. Two judged Open simulations this month.',
  tag:'C&J 100 kg ✓',
+ date:'2027-02-01',
  tgt:{cj:99,sn:86,bs:134,fs:117,rmu:10,bmu:10,c2b:35,hspu:28,hspu_d:10,hsw:50,du:200,row500:95,run5k:1200,fran:240,grace:210,helen:510,isabel:240,diane:300},
  groups:[
   {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'99 kg'},{l:'Snatch',k:'sn',d:'86 kg'},{l:'Front squat',k:'fs',d:'117 kg'},{l:'Back squat',k:'bs',d:'134 kg'}]},
@@ -317,6 +379,7 @@ var PLAN=[
 {m:9,ph:3,name:'Month 9 — Mar 2027',phLabel:'Open 2027',
  focus:'Open month. Volume -20% in 5 days before each workout. No new skills. Peak for each of the 3 workouts individually. You are ready.',
  tag:null,
+ date:'2027-03-01',
  tgt:{cj:102,sn:88,bs:135,fs:118,rmu:10,bmu:10,c2b:35,hspu:29,hspu_d:10,hsw:50,du:200,row500:95,run5k:1200,fran:240,grace:210,helen:510,isabel:240,diane:300},
  groups:[
   {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj',d:'100-103 kg'},{l:'Snatch',k:'sn',d:'87-90 kg'},{l:'Front squat',k:'fs',d:'117-120 kg'},{l:'Back squat',k:'bs',d:'133-136 kg'}]},
@@ -339,6 +402,17 @@ var METRICS={
   diane:{label:'Diane',unit:'time',isTime:true}
 };
 
+// Solid Rx-level standards (not elite) — used as the ramp target for generated plans.
+var RX_GOAL={
+  cj:70,sn:55,bs:100,fs:80,
+  rmu:3,bmu:5,c2b:12,hspu:10,hspu_d:3,hsw:15,
+  du:60,
+  row500:110,run5k:1440,
+  fran:480,grace:240,helen:720,isabel:330,diane:420
+};
+
+var PLAN=null,SETUP=null;
+
 // ── CUSTOM PLAN ────────────────────────────────────────────────────────────
 var CUSTOM={
   data:{},
@@ -360,6 +434,72 @@ var DB={
   history:function(k){var r=[];this.logs.forEach(function(l){var v=l.metrics[k];if(v!==null&&v!==undefined&&v!=='')r.push({date:l.date,value:v});});return r;}
 };
 
+// ── PLAN GENERATOR ─────────────────────────────────────────────────────────
+var PHASE_TITLE=['Building the base','Under fatigue','Peak & taper'];
+var PHASE_FOCUS=[
+  'Close the gap on your weakest lifts and skills. Consistency over intensity — build volume tolerance and clean movement patterns before pushing pace.',
+  'Combine skills inside WODs and push pace under fatigue. Barbell cycling speed and gymnastics volume both step up.',
+  'Volume comes down, intensity stays high. Sharpen every benchmark and lock in the skills you already own — no new skills this late.'
+];
+var MON_ABBR=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var PLAN_GROUP_DEFS=[
+  {title:'BARBELL TARGETS',rows:[{l:'C&J',k:'cj'},{l:'Snatch',k:'sn'},{l:'Front squat',k:'fs'},{l:'Back squat',k:'bs'}]},
+  {title:'GYMNASTICS',rows:[{l:'Ring MU (fresh)',k:'rmu'},{l:'Bar MU (fresh)',k:'bmu'},{l:'Butterfly C2B',k:'c2b'},{l:'Strict HSPU',k:'hspu'},{l:'Deficit HSPU (10cm)',k:'hspu_d'},{l:'HS walks',k:'hsw'}]},
+  {title:'ENGINE & SKILLS',rows:[{l:'Double-unders',k:'du'},{l:'Row 500m',k:'row500'},{l:'Run 5km',k:'run5k'}]},
+  {title:'BENCHMARK WODS — fresh',rows:[{l:'Fran',k:'fran'},{l:'Grace',k:'grace'},{l:'Helen',k:'helen'},{l:'Isabel',k:'isabel'},{l:'Diane',k:'diane'}]}
+];
+
+function pad2(n){return n<10?'0'+n:''+n;}
+function monthAdd(startDate,n){
+  var p=startDate.split('-');var d=new Date(+p[0],+p[1]-1+n,1);
+  return{iso:d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-01',mon:d.getMonth(),year:d.getFullYear()};
+}
+function dspText(key,val){
+  if(val===null||val===undefined)return '—';
+  var m=METRICS[key];
+  if(m.isTime)return s2t(val);
+  if(m.unit==='kg')return val+' kg';
+  if(m.unit==='m')return val+' m';
+  return val+' unbroken';
+}
+
+function buildPlan(setup){
+  var N=setup.months,sv=setup.startValues||{};
+  var plan=[];
+  for(var i=0;i<N;i++){
+    var frac=(i+1)/N;
+    var ph=Math.min(3,Math.floor(i/(N/3))+1);
+    var dm=monthAdd(setup.startDate,i);
+    var tgt={};
+    Object.keys(RX_GOAL).forEach(function(key){
+      var s=sv[key];
+      if(s===null||s===undefined||s===''||isNaN(s)){tgt[key]=null;return;}
+      var goal=RX_GOAL[key],m=METRICS[key];
+      var meets=m.isTime?s<=goal:s>=goal;
+      if(meets){tgt[key]=goal;return;}
+      var raw=s+(goal-s)*frac;
+      tgt[key]=(m.unit==='kg')?Math.round(raw*2)/2:Math.round(raw);
+    });
+    var groups=PLAN_GROUP_DEFS.map(function(g){
+      return{title:g.title,rows:g.rows.map(function(r){return{l:r.l,k:r.k,d:dspText(r.k,tgt[r.k])};})};
+    });
+    plan.push({
+      m:i+1,ph:ph,name:'Month '+(i+1)+' — '+MON_ABBR[dm.mon]+' '+dm.year,
+      phLabel:'Phase '+ph+' · '+PHASE_TITLE[ph-1],
+      focus:PHASE_FOCUS[ph-1],
+      tag:i===N-1?'Goal month':null,
+      date:dm.iso,tgt:tgt,groups:groups
+    });
+  }
+  return plan;
+}
+
+function applySetup(){
+  if(!SETUP)return false;
+  PLAN=SETUP.preset==='example'?EXAMPLE_PRESET_PLAN:buildPlan(SETUP);
+  return true;
+}
+
 // ── SYNC ───────────────────────────────────────────────────────────────────
 function fetchT(url,opts){
   return new Promise(function(res,rej){
@@ -368,30 +508,40 @@ function fetchT(url,opts){
   });
 }
 
+var SYNC_MODE_KEY='cf27_sync_mode';
+(function(){
+  var qp=new URLSearchParams(location.search).get('sync');
+  if(qp==='on'||qp==='off')try{localStorage.setItem(SYNC_MODE_KEY,qp);}catch(e){}
+})();
+function syncEnabled(){try{return localStorage.getItem(SYNC_MODE_KEY)==='on';}catch(e){return false;}}
+
 function setSyncStatus(s){
   var el=document.getElementById('syncStatus');if(!el)return;
-  var states={synced:{c:'#1D9E75',t:'● synced'},cached:{c:'#BA7517',t:'◌ offline (cached)'},offline:{c:'#BA7517',t:'◌ offline'},error:{c:'#E24B4A',t:'✕ sync error'},saving:{c:'#378ADD',t:'↑ saving…'}};
+  var states={synced:{c:'#1D9E75',t:'● synced'},cached:{c:'#BA7517',t:'◌ offline (cached)'},offline:{c:'#BA7517',t:'◌ offline'},error:{c:'#E24B4A',t:'✕ sync error'},saving:{c:'#378ADD',t:'↑ saving…'},local:{c:'#999',t:'◌ local only'}};
   var st=states[s]||states.offline;
   el.style.color=st.c;el.textContent=st.t;
 }
 
 async function loadData(){
-  try{
-    var r=await fetchT(API_URL,{headers:{'X-Key':API_KEY}});
-    if(r.ok){
-      var d=await r.json();
-      DB.logs=Array.isArray(d.logs)?d.logs:[];
-      DB.notes=Array.isArray(d.notes)?d.notes:[];
-      CUSTOM.data=d.plan||{};
-      try{localStorage.setItem('cf27_cache',JSON.stringify({logs:DB.logs,notes:DB.notes,plan:CUSTOM.data}));}catch(e){}
-      setSyncStatus('synced');return;
-    }
-  }catch(e){}
+  if(syncEnabled()){
+    try{
+      var r=await fetchT(API_URL,{headers:{'X-Key':API_KEY}});
+      if(r.ok){
+        var d=await r.json();
+        DB.logs=Array.isArray(d.logs)?d.logs:[];
+        DB.notes=Array.isArray(d.notes)?d.notes:[];
+        var pd=d.plan||{};
+        SETUP=pd.setup||null;CUSTOM.data=pd.overrides||{};
+        try{localStorage.setItem('cf27_cache',JSON.stringify({logs:DB.logs,notes:DB.notes,plan:pd}));}catch(e){}
+        setSyncStatus('synced');return;
+      }
+    }catch(e){}
+  }
   try{
     var cached=localStorage.getItem('cf27_cache');
-    if(cached){var d=JSON.parse(cached);DB.logs=Array.isArray(d.logs)?d.logs:[];DB.notes=Array.isArray(d.notes)?d.notes:[];CUSTOM.data=d.plan||{};}
+    if(cached){var d=JSON.parse(cached);DB.logs=Array.isArray(d.logs)?d.logs:[];DB.notes=Array.isArray(d.notes)?d.notes:[];var pd=d.plan||{};SETUP=pd.setup||null;CUSTOM.data=pd.overrides||{};}
   }catch(e){}
-  setSyncStatus('cached');
+  setSyncStatus(syncEnabled()?'cached':'local');
 }
 
 var saveTimer=null;
@@ -402,8 +552,9 @@ function saveAll(){
 }
 
 async function doSave(){
-  var payload={logs:DB.logs,notes:DB.notes,plan:CUSTOM.data};
+  var payload={logs:DB.logs,notes:DB.notes,plan:{setup:SETUP,overrides:CUSTOM.data}};
   try{localStorage.setItem('cf27_cache',JSON.stringify(payload));}catch(e){}
+  if(!syncEnabled()){setSyncStatus('local');return;}
   setSyncStatus('saving');
   try{
     var r=await fetchT(API_URL,{method:'POST',headers:{'Content-Type':'application/json','X-Key':API_KEY},body:JSON.stringify(payload)});
@@ -432,7 +583,7 @@ var curM=0,isEdit=false;
 
 function renderDots(){
   var h='';
-  for(var i=0;i<9;i++){
+  for(var i=0;i<PLAN.length;i++){
     var ph=PLAN[i].ph;
     var cl=i===curM?' active" style="background:'+phDotCol(ph)+'"':'"';
     h+='<div class="dot'+cl+'></div>';
@@ -446,7 +597,7 @@ function renderPlan(){
   document.getElementById('mPhase').textContent=d.phLabel;
   renderDots();
   document.getElementById('prevM').disabled=curM===0;
-  document.getElementById('nextM').disabled=curM===8;
+  document.getElementById('nextM').disabled=curM===PLAN.length-1;
   var tb='';
   if(!isEdit){
     tb+='<button class="tool-btn" onclick="enterEdit()">Edit targets</button>';
@@ -530,7 +681,7 @@ function saveEdit(){
 }
 
 function resetMonth(){if(!confirm('Reset Month '+(curM+1)+' to defaults?'))return;CUSTOM.reset(curM);renderPlan();showToast('Reset ✓');}
-function changeM(d){curM=Math.max(0,Math.min(8,curM+d));isEdit=false;renderPlan();}
+function changeM(d){curM=Math.max(0,Math.min(PLAN.length-1,curM+d));isEdit=false;renderPlan();}
 
 // ── LOG ────────────────────────────────────────────────────────────────────
 var NUM_KEYS=['cj','sn','bs','fs','rmu','bmu','c2b','hspu','hspu_d','hsw','du','bw'];
@@ -565,7 +716,6 @@ function renderRecentLogs(){
 
 // ── PROGRESS ───────────────────────────────────────────────────────────────
 var progChart=null;
-var MONTH_DATES=['2026-07-01','2026-08-01','2026-09-01','2026-10-01','2026-11-01','2026-12-01','2027-01-01','2027-02-01','2027-03-01'];
 
 function renderProgress(){
   var key=document.getElementById('metricSel').value;var m=METRICS[key];if(!m)return;
@@ -576,7 +726,7 @@ function renderProgress(){
   statH+='<div class="stat-card"><div class="stat-lbl">CURRENT BEST</div><div class="stat-val">'+(latest!==null?fmtVal(latest,m.isTime):'—')+'<span class="stat-unit"> '+m.unit+'</span></div></div>';
   statH+='<div class="stat-card"><div class="stat-lbl">TARGET '+(nextName||'').toUpperCase()+'</div><div class="stat-val">'+(nextTgt!==null?fmtVal(nextTgt,m.isTime):'—')+'<span class="stat-unit"> '+m.unit+'</span></div></div>';
   document.getElementById('statGrid').innerHTML=statH;
-  var tgtMap={};PLAN.forEach(function(p,i){var t=CUSTOM.getTgt(i,key);if(t!==null&&t!==undefined)tgtMap[MONTH_DATES[i]]=t;});
+  var tgtMap={};PLAN.forEach(function(p,i){var t=CUSTOM.getTgt(i,key);if(t!==null&&t!==undefined)tgtMap[p.date]=t;});
   var actMap={};history.forEach(function(h){actMap[h.date]=h.value;});
   var allDates=[];Object.keys(tgtMap).forEach(function(d){if(allDates.indexOf(d)<0)allDates.push(d);});history.forEach(function(h){if(allDates.indexOf(h.date)<0)allDates.push(h.date);});allDates.sort();
   var tgtArr=allDates.map(function(d){return tgtMap[d]!==undefined?tgtMap[d]:null;});
@@ -595,9 +745,13 @@ function renderProgress(){
 }
 
 function getCurMonthIdx(){
-  var now=new Date();var y=now.getFullYear();var mo=now.getMonth()+1;
-  var map={'2026-7':0,'2026-8':1,'2026-9':2,'2026-10':3,'2026-11':4,'2026-12':5,'2027-1':6,'2027-2':7,'2027-3':8};
-  return map[y+'-'+mo]!==undefined?map[y+'-'+mo]:0;
+  if(!PLAN||!PLAN.length)return 0;
+  var t=today();
+  for(var i=0;i<PLAN.length;i++){
+    var end=(i+1<PLAN.length)?PLAN[i+1].date:null;
+    if(t>=PLAN[i].date&&(end===null||t<end))return i;
+  }
+  return t<PLAN[0].date?0:PLAN.length-1;
 }
 
 // ── NOTES ──────────────────────────────────────────────────────────────────
@@ -620,6 +774,54 @@ function showTab(name){
   if(name==='log')renderRecentLogs();
 }
 
+// ── ONBOARDING ─────────────────────────────────────────────────────────────
+function showOnboarding(){
+  document.querySelector('.tab-bar').style.display='none';
+  ['plan','log','progress','notes'].forEach(function(t){document.getElementById('pane-'+t).classList.remove('active');});
+  document.getElementById('pane-onboard').classList.add('active');
+  document.getElementById('ob_months').value='9';
+  Object.keys(RX_GOAL).forEach(function(k){var el=document.getElementById('ob_'+k);if(el)el.value='';});
+}
+
+function showMainApp(){
+  document.querySelector('.tab-bar').style.display='';
+  document.getElementById('pane-onboard').classList.remove('active');
+  showTab('plan');
+}
+
+function startPlan(setup){
+  SETUP=setup;CUSTOM.data={};
+  applySetup();
+  saveAll();
+  curM=getCurMonthIdx();
+  showMainApp();
+  renderPlan();renderRecentLogs();renderNotes();
+}
+
+function loadExamplePlan(){
+  startPlan({preset:'example'});
+  showToast('Example plan loaded ✓');
+}
+
+function buildMyPlan(){
+  var months=parseInt(document.getElementById('ob_months').value,10);
+  var startValues={};
+  Object.keys(RX_GOAL).forEach(function(k){
+    var el=document.getElementById('ob_'+k);if(!el)return;
+    var m=METRICS[k];
+    startValues[k]=m.isTime?t2s(el.value):(el.value!==''?parseFloat(el.value):null);
+  });
+  startPlan({months:months,startDate:today(),startValues:startValues,preset:'custom'});
+  showToast('Plan built ✓');
+}
+
+function changePlanSetup(){
+  if(!confirm('Reset your plan setup? This clears month targets/overrides and returns to onboarding.'))return;
+  SETUP=null;CUSTOM.data={};PLAN=null;
+  saveAll();
+  showOnboarding();
+}
+
 // ── TOAST ──────────────────────────────────────────────────────────────────
 function showToast(msg){var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(function(){t.classList.remove('show');},2000);}
 
@@ -628,8 +830,13 @@ document.getElementById('logDate').value=today();
 document.getElementById('planContent').innerHTML='<div class="empty" style="padding:60px 20px;">Loading...</div>';
 
 loadData().then(function(){
-  curM=getCurMonthIdx();
-  renderPlan();renderRecentLogs();renderNotes();
+  if(applySetup()){
+    curM=getCurMonthIdx();
+    showMainApp();
+    renderPlan();renderRecentLogs();renderNotes();
+  }else{
+    showOnboarding();
+  }
 });
 </script>
 </body>
