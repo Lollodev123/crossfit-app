@@ -75,6 +75,6 @@ To deploy: `./setup.sh`, run as root on a fresh VPS. Installs nginx/certbot/Flas
 
 ## Provenance, AI-assisted development, and license
 
-Built solo, using [Claude Code](https://claude.com/claude-code) as a pair-programming tool for implementation once I'd made the product and architecture decisions myself — the data model, interpolation rules, deploy setup, and scope calls are mine; AI accelerated writing and refactoring the code against that spec, and I reviewed and tested every change, including in a real browser, before accepting it.
+Built solo, using Claude Code as a pair-programming tool for implementation once I'd made the product and architecture decisions myself — the data model, interpolation rules, deploy setup, and scope calls are mine; AI accelerated writing and refactoring the code against that spec, and I reviewed and tested every change, including in a real browser, before accepting it.
 
 MIT — see [LICENSE](LICENSE).
